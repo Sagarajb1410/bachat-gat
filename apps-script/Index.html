@@ -321,17 +321,29 @@ var IC = {
 };
 function icon(name) { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">' + IC[name] + '</svg>'; }
 
+// Address of the group's Apps Script web app (Deploy -> Web app URL). Used when the app runs on GitHub.
+var APP_URL = 'https://script.google.com/macros/s/AKfycbx_W6K4qAjk7oSgf1u3SnCdjNQeYrDkhNv6xnf8Cq2bQ5IoJYYhI2dmRzpwPEH3L1_r/exec';
+var ON_GOOGLE = !!(window.google && google.script && google.script.run);
 function call(fn) {
   var args = Array.prototype.slice.call(arguments, 1);
-  return new Promise(function (resolve) {
-    google.script.run
-      .withSuccessHandler(function (r) {
-        if (r && r.error === 'session') { logout(true); }
-        resolve(r || { ok:false, error:'network' });
-      })
-      .withFailureHandler(function () { resolve({ ok:false, error:'network' }); })[fn].apply(null, args);
-  });
+  function done(r) {
+    if (r && r.error === 'session') { logout(true); }
+    return r || { ok:false, error:'network' };
+  }
+  if (ON_GOOGLE) {
+    return new Promise(function (resolve) {
+      google.script.run
+        .withSuccessHandler(function (r) { resolve(done(r)); })
+        .withFailureHandler(function () { resolve({ ok:false, error:'network' }); })[fn].apply(null, args);
+    });
+  }
+  // Plain-text POST keeps this a "simple" request, so the browser allows Google's answer.
+  return fetch(APP_URL, { method:'POST', body: JSON.stringify({ fn: fn, args: args }), redirect:'follow' })
+    .then(function (res) { return res.json(); })
+    .then(done)
+    .catch(function () { return { ok:false, error:'network' }; });
 }
+function appLink(fallback) { return ON_GOOGLE ? fallback : (location.origin + location.pathname); }
 
 /* Count the big number up from 0 so the balance feels alive. */
 function countUp(el, to) {
@@ -604,7 +616,7 @@ function renderRemind(month) {
         var i = r.rows.indexOf(x);
         return '<li class="li">' + avatar(x.name, x.id) +
           '<div class="mid"><b>' + esc(x.name) + '</b><small>' + rs(x.depositDue + x.interestDue) + (x.paid ? ' · <span class="pos">✓ ' + t('paid') + '</span>' : '') + (x.phone ? '' : ' · ' + t('noPhone')) + '</small></div>' +
-          '<div class="end"><a class="wa" target="_blank" rel="noopener" data-wa="' + i + '" href="' + esc(waLink(x.phone, waText(x, r.month, r.url, r.groupName))) + '">' + icon('wa') + 'WhatsApp</a></div></li>';
+          '<div class="end"><a class="wa" target="_blank" rel="noopener" data-wa="' + i + '" href="' + esc(waLink(x.phone, waText(x, r.month, appLink(r.url), r.groupName))) + '">' + icon('wa') + 'WhatsApp</a></div></li>';
       }).join('') + '</ul></div>';
     Array.prototype.forEach.call(document.querySelectorAll('[data-wa]'), function (a) {
       a.addEventListener('click', function () { a.classList.add('sent'); a.innerHTML = '✓ WhatsApp'; });

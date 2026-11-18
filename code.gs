@@ -34,6 +34,7 @@ var SESSION_SECONDS = 6 * 60 * 60;   // CacheService maximum
 var MAX_FAILS = 5;
 var LOCK_SECONDS = 15 * 60;
 var GROUP_NAME = 'Friends Circle Bachat Gat';
+var APP_HOME = 'https://sagarajb1410.github.io/bachat-gat/';  // the link members open
 
 /* ------------------------------------------------------------------ */
 /* Web app entry point and sheet menu                                  */
@@ -43,8 +44,29 @@ function doGet() {
   return HtmlService.createHtmlOutputFromFile('Index')
     .setTitle(GROUP_NAME)
     .addMetaTag('viewport', 'width=device-width, initial-scale=1, maximum-scale=1')
-    // Lets the app open inside the group's own app page (GitHub Pages) with its icon and full screen.
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+}
+
+/**
+ * Data link for the group's app page on GitHub (sagarajb1410.github.io/bachat-gat).
+ * The page sends {fn, args} as text and gets JSON back. Only the app's own
+ * functions below can be called; each one still checks the PIN session itself.
+ */
+var API_FUNCTIONS = {
+  apiLogin: apiLogin, apiLogout: apiLogout, apiChangePin: apiChangePin, apiMyData: apiMyData,
+  apiAllBalances: apiAllBalances, apiGetMonth: apiGetMonth, apiSaveMonth: apiSaveMonth,
+  apiAddCash: apiAddCash, apiMonthView: apiMonthView, apiReminders: apiReminders
+};
+function doPost(e) {
+  var out;
+  try {
+    var req = JSON.parse((e && e.postData && e.postData.contents) || '{}');
+    var fn = API_FUNCTIONS.hasOwnProperty(req.fn) ? API_FUNCTIONS[req.fn] : null;
+    out = fn ? fn.apply(null, Array.isArray(req.args) ? req.args.slice(0, 5) : []) : { ok: false, error: 'network' };
+  } catch (err) {
+    out = { ok: false, error: 'network' };
+  }
+  return ContentService.createTextOutput(JSON.stringify(out)).setMimeType(ContentService.MimeType.JSON);
 }
 
 function onOpen() {
@@ -164,8 +186,7 @@ function apiReminders(token, month) {
   month = normaliseMonth_(month);
   if (!month) return fail_('bad_month');
   var book = loadBook_();
-  var url = '';
-  try { url = ScriptApp.getService().getUrl() || ''; } catch (e) {}
+  var url = APP_HOME;
   var rows = book.members.filter(function (m) { return m.status === 'active'; }).map(function (m) {
     var b = memberBalance_(book, m.id);
     var loanStart = loanOutstanding_(book, m.id, month);
@@ -408,8 +429,7 @@ function sendMonthlyReminder() {
   var ss = SpreadsheetApp.getActive();
   var month = Utilities.formatDate(new Date(), ss.getSpreadsheetTimeZone(), 'yyyy-MM');
   var book = loadBook_();
-  var url = '';
-  try { url = ScriptApp.getService().getUrl() || ''; } catch (e) {}
+  var url = APP_HOME;
   var lines = book.members.filter(function (m) { return m.status === 'active'; }).map(function (m) {
     var due = book.rules.deposit + interestFor_(loanOutstanding_(book, m.id, month), book.rules);
     var paid = book.entries.some(function (e) { return e.id === m.id && e.month === month && e.deposit > 0; });

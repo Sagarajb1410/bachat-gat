@@ -1,6 +1,6 @@
 // Keeps the app shell (this page and icons) available so the app opens instantly.
 // The money data is never cached: it always comes live from the Google Sheet.
-var CACHE = 'bachat-gat-v2';
+var CACHE = 'bachat-gat-v3';
 var SHELL = ['./', 'index.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'icon-180.png'];
 self.addEventListener('install', function (e) { e.waitUntil(caches.open(CACHE).then(function (c) { return c.addAll(SHELL); })); self.skipWaiting(); });
 self.addEventListener('activate', function (e) {

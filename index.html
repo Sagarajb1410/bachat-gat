@@ -1,42 +1,778 @@
 <!DOCTYPE html>
 <html lang="mr">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Friends Circle Bachat Gat</title>
 <meta name="description" content="आपली बचत, आपला विश्वास">
-<meta name="theme-color" content="#07090d">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#07090d">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Mukta:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-  html, body { margin:0; height:100%; background:#07090d; color:#eef2f6; font-family:system-ui, sans-serif; overflow:hidden; }
-  iframe { position:fixed; inset:0; width:100%; height:100%; border:0; background:#07090d; }
-  #splash { position:fixed; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; background:#07090d; transition:opacity .4s; z-index:2; }
-  #splash img { width:88px; height:88px; border-radius:24px; }
-  #splash b { font-size:20px; }
-  #splash span { color:#f3c969; font-size:14px; }
-  .bar { width:120px; height:4px; border-radius:4px; background:rgba(255,255,255,.08); overflow:hidden; }
-  .bar i { display:block; width:40%; height:100%; background:#f3c969; animation:s 1.1s ease-in-out infinite; }
-  @keyframes s { 0% { transform:translateX(-100%); } 100% { transform:translateX(300%); } }
-  #off { display:none; position:fixed; inset:0; z-index:3; background:#07090d; align-items:center; justify-content:center; text-align:center; padding:24px; }
+  :root {
+    --bg:#07090d; --bg2:#0d1118; --card:#121822; --card2:#18202c; --line:rgba(255,255,255,.07);
+    --ink:#eef2f6; --muted:#8b97a8; --gold:#f3c969; --gold2:#d99a2b; --mint:#3ee6a8; --mint-d:#14b37d;
+    --em:#3ee6a8; --em-l:rgba(62,230,168,.12); --gold-l:rgba(243,201,105,.12);
+    --red:#ff6b6b; --red-l:rgba(255,107,107,.12); --wa:#25d366;
+    --shadow:0 10px 30px rgba(0,0,0,.35);
+  }
+  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html, body { margin:0; }
+  body { font-family:'Outfit', 'Mukta', 'Noto Sans Devanagari', system-ui, sans-serif; color:var(--ink); font-size:16px; line-height:1.35;
+         background:radial-gradient(900px 500px at 100% -10%, rgba(243,201,105,.10), transparent 60%),
+                    radial-gradient(700px 500px at -20% 30%, rgba(62,230,168,.08), transparent 60%), var(--bg);
+         background-attachment:fixed; min-height:100vh; }
+  .hidden { display:none !important; }
+
+  /* App bar */
+  .appbar { position:sticky; top:0; z-index:10; display:flex; align-items:center; gap:10px; padding:12px 16px; background:rgba(7,9,13,.72); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); border-bottom:1px solid var(--line); }
+  .logo { width:38px; height:38px; border-radius:12px; background:linear-gradient(135deg,#ffe29a,var(--gold) 40%,var(--gold2)); display:grid; place-items:center; font-weight:800; color:#1a1204; font-size:20px; flex:none; box-shadow:0 4px 14px rgba(243,201,105,.3); }
+  .appbar .ttl { flex:1; min-width:0; }
+  .appbar .ttl b { display:block; font-size:15px; font-weight:700; letter-spacing:.2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .appbar .ttl span { font-size:12px; color:var(--gold); }
+  .pill { background:var(--card2); color:var(--ink); border:1px solid var(--line); border-radius:999px; padding:7px 10px; font:inherit; font-size:13px; }
+  .pill option { color:#000; background:#fff; }
+  .iconbtn { background:var(--card2); border:1px solid var(--line); color:var(--ink); width:36px; height:36px; border-radius:50%; display:grid; place-items:center; }
+  .iconbtn svg { width:18px; height:18px; }
+
+  main { max-width:560px; margin:0 auto; padding:16px 16px 110px; }
+
+  /* Bottom navigation (floating glass bar) */
+  .nav { position:fixed; left:12px; right:12px; bottom:calc(10px + env(safe-area-inset-bottom)); z-index:10; max-width:536px; margin:0 auto;
+         background:rgba(18,24,34,.86); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); border:1px solid var(--line);
+         border-radius:22px; display:flex; justify-content:space-around; padding:7px 4px; box-shadow:0 12px 30px rgba(0,0,0,.5); }
+  .nav button { flex:1; background:none; border:0; color:var(--muted); font:inherit; font-size:11px; display:flex; flex-direction:column; align-items:center; gap:3px; padding:3px 2px; min-width:0; }
+  .nav button svg { width:22px; height:22px; }
+  .nav button span { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; }
+  .nav button.on { color:var(--gold); font-weight:600; }
+  .nav .ic { padding:4px 14px; border-radius:999px; display:grid; place-items:center; transition:background .2s; }
+  .nav button.on .ic { background:var(--gold-l); }
+
+  /* Cards */
+  .card { background:linear-gradient(180deg,var(--card2),var(--card)); border:1px solid var(--line); border-radius:22px; padding:18px; margin-bottom:14px; box-shadow:var(--shadow); }
+  .card h2 { font-size:15px; margin:0 0 12px; font-weight:600; display:flex; align-items:center; gap:8px; color:var(--ink); letter-spacing:.2px; }
+  .label { color:var(--muted); font-size:13px; }
+  .neg { color:var(--red) !important; }
+  .pos { color:var(--mint) !important; }
+  .num { font-variant-numeric:tabular-nums; }
+
+  /* Gold bank card hero */
+  .hero { position:relative; overflow:hidden; color:#1a1204; border-radius:24px; padding:20px 20px 18px; margin-bottom:14px; isolation:isolate;
+          background:linear-gradient(125deg,#fff0bf 0%, #f3c969 28%, #d99a2b 62%, #9a6416 100%);
+          box-shadow:0 18px 40px rgba(217,154,43,.28), inset 0 1px 0 rgba(255,255,255,.6); }
+  .hero::before { content:''; position:absolute; inset:0; z-index:-1; background:
+      repeating-linear-gradient(115deg, rgba(255,255,255,.0) 0 14px, rgba(255,255,255,.07) 14px 15px),
+      radial-gradient(300px 160px at 85% -10%, rgba(255,255,255,.55), transparent 70%); }
+  .hero::after { content:''; position:absolute; width:260px; height:260px; right:-110px; bottom:-150px; border-radius:50%; border:28px solid rgba(255,255,255,.12); z-index:-1; }
+  .hero.dark { color:var(--ink); background:linear-gradient(135deg,#1d2633 0%, #111821 60%, #0b1017 100%); box-shadow:var(--shadow); border:1px solid var(--line); }
+  .hero.dark::before { background:radial-gradient(320px 180px at 90% -20%, rgba(62,230,168,.20), transparent 70%), radial-gradient(260px 160px at -10% 120%, rgba(243,201,105,.14), transparent 70%); }
+  .hero.dark::after { border-color:rgba(255,255,255,.04); }
+  .hero .top { display:flex; align-items:center; justify-content:space-between; }
+  .chip { width:42px; height:32px; border-radius:7px; background:linear-gradient(135deg,#fdf1c6,#caa04a 55%,#f6dc8e); box-shadow:inset 0 0 0 1px rgba(0,0,0,.18); position:relative; }
+  .chip::before, .chip::after { content:''; position:absolute; left:6px; right:6px; height:1px; background:rgba(0,0,0,.25); }
+  .chip::before { top:11px; } .chip::after { bottom:11px; }
+  .brand { font-weight:800; letter-spacing:.02em; font-size:12px; opacity:.75; text-transform:uppercase; }
+  .hero .hi { font-size:14px; opacity:.85; }
+  .hero .cap { font-size:12px; opacity:.75; margin-top:16px; letter-spacing:.02em; font-weight:600; }
+  .hero .amt { font-size:42px; font-weight:800; letter-spacing:-1px; line-height:1.05; margin:4px 0 14px; font-variant-numeric:tabular-nums; }
+  .hero .cardno { font-family:'Outfit',monospace; letter-spacing:3px; font-size:15px; opacity:.8; margin-bottom:12px; }
+  .hero .row2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; position:relative; z-index:1; }
+  .hero .mini { background:rgba(255,255,255,.28); border:1px solid rgba(255,255,255,.35); border-radius:14px; padding:9px 12px; }
+  .hero.dark .mini { background:rgba(255,255,255,.05); border-color:var(--line); }
+  .hero .mini span { font-size:12px; opacity:.8; display:block; }
+  .hero .mini b { font-size:18px; font-variant-numeric:tabular-nums; }
+  .hero .holder { display:flex; justify-content:space-between; align-items:flex-end; font-size:12px; opacity:.85; margin-top:14px; }
+  .hero .holder b { display:block; font-size:15px; letter-spacing:.06em; text-transform:uppercase; }
+
+  .badge { display:inline-flex; align-items:center; gap:4px; font-size:12px; font-weight:600; padding:3px 9px; border-radius:999px; white-space:nowrap; }
+  .badge.gold { background:var(--gold-l); color:var(--gold); border:1px solid rgba(243,201,105,.25); }
+  .hero .badge.gold { background:rgba(26,18,4,.85); color:var(--gold); border:0; }
+  .badge.green { background:var(--em-l); color:var(--mint); }
+  .badge.red { background:var(--red-l); color:var(--red); }
+  .badge.grey { background:rgba(255,255,255,.06); color:var(--muted); }
+
+  .loancard { display:flex; gap:14px; align-items:center; }
+  .loancard .ico { width:48px; height:48px; border-radius:15px; display:grid; place-items:center; flex:none; }
+  .loancard .ico svg { width:24px; height:24px; }
+  .loancard .big2 { font-size:26px; font-weight:800; font-variant-numeric:tabular-nums; }
+
+  .stats { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .stat { background:rgba(255,255,255,.035); border:1px solid var(--line); border-radius:16px; padding:12px; }
+  .stat span { font-size:12px; color:var(--muted); display:block; }
+  .stat b { font-size:20px; font-weight:700; font-variant-numeric:tabular-nums; }
+
+  /* Charts */
+  .chart { width:100%; height:auto; display:block; }
+  .donutwrap { display:flex; gap:16px; align-items:center; }
+  .donutwrap svg { width:132px; height:132px; flex:none; }
+  .legend { list-style:none; margin:0; padding:0; flex:1; min-width:0; font-size:13.5px; }
+  .legend li { display:flex; align-items:center; gap:8px; padding:4px 0; }
+  .legend i { width:10px; height:10px; border-radius:3px; flex:none; }
+  .legend span { flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:var(--muted); }
+  .legend b { font-variant-numeric:tabular-nums; }
+  .ringwrap { display:flex; gap:16px; align-items:center; margin-top:14px; }
+  .ringwrap svg { width:96px; height:96px; flex:none; }
+
+  /* Lists */
+  .list { list-style:none; margin:0; padding:0; }
+  .li { display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid var(--line); }
+  .li:last-child { border-bottom:0; }
+  .li.me { background:var(--gold-l); margin:0 -18px; padding:12px 18px; }
+  .av { width:42px; height:42px; border-radius:14px; display:grid; place-items:center; font-weight:700; font-size:15px; color:#fff; flex:none; box-shadow:inset 0 0 0 1px rgba(255,255,255,.15); }
+  .li .mid { flex:1; min-width:0; }
+  .li .mid b { display:block; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .li .mid small { color:var(--muted); font-size:13px; }
+  .li .end { text-align:right; flex:none; }
+  .li .end b { display:block; font-weight:700; font-variant-numeric:tabular-nums; }
+  .mbadge { width:46px; height:46px; border-radius:15px; background:rgba(255,255,255,.05); border:1px solid var(--line); color:var(--gold); display:grid; place-items:center; text-align:center; font-weight:700; font-size:12px; line-height:1.05; flex:none; }
+  .mbadge small { display:block; font-weight:500; font-size:10.5px; color:var(--muted); }
+  .totalrow { display:flex; justify-content:space-between; padding:14px 0 2px; border-top:1px solid rgba(243,201,105,.35); margin-top:4px; font-weight:700; }
+
+  .progress { height:10px; background:rgba(255,255,255,.06); border-radius:999px; overflow:hidden; margin:8px 0 4px; }
+  .progress i { display:block; height:100%; background:linear-gradient(90deg,var(--mint-d),var(--mint)); border-radius:999px; transition:width .6s ease; }
+
+  /* Forms */
+  label { display:block; font-size:13px; color:var(--muted); margin:12px 0 6px; font-weight:500; }
+  input, select.f { width:100%; font:inherit; font-size:18px; padding:13px 14px; border:1px solid rgba(255,255,255,.1); border-radius:14px; background:rgba(255,255,255,.04); color:var(--ink); outline:none; transition:border-color .15s, box-shadow .15s; color-scheme:dark; }
+  input::placeholder { color:#4f5a69; }
+  input:focus, select.f:focus { border-color:var(--gold); box-shadow:0 0 0 3px rgba(243,201,105,.18); }
+  select.f option { background:#121822; }
+  .btn { width:100%; display:block; background:linear-gradient(135deg,#ffe29a,var(--gold) 45%,var(--gold2)); color:#1a1204; border:0; border-radius:16px; font:inherit; font-size:17px; font-weight:700; padding:15px; margin-top:18px; box-shadow:0 10px 24px rgba(217,154,43,.3); letter-spacing:.2px; }
+  .btn:active { transform:translateY(1px); }
+  .btn.ghost { background:rgba(255,255,255,.04); color:var(--gold); border:1px solid rgba(243,201,105,.4); box-shadow:none; font-size:15px; padding:12px; margin-top:0; }
+  .btn.gold { background:linear-gradient(135deg,var(--mint),var(--mint-d)); color:#04150e; box-shadow:0 10px 24px rgba(62,230,168,.22); }
+  button:disabled { opacity:.6; }
+  .err { color:var(--red); margin-top:10px; min-height:1.2em; font-size:14.5px; }
+  .ok { color:var(--mint); margin-top:10px; font-weight:600; }
+  .wa { display:inline-flex; align-items:center; gap:6px; background:var(--wa); color:#04150e; text-decoration:none; font-weight:700; padding:9px 14px; border-radius:999px; font-size:14px; box-shadow:0 6px 16px rgba(37,211,102,.25); }
+  .wa svg { width:17px; height:17px; }
+  .wa.sent { background:var(--em-l); color:var(--mint); box-shadow:none; }
+
+  /* Login */
+  .login-hero { padding:34px 8px 26px; text-align:center; }
+  .login-hero .logo { width:76px; height:76px; border-radius:24px; font-size:38px; margin:0 auto 16px; box-shadow:0 16px 40px rgba(243,201,105,.35); }
+  .login-hero h1 { margin:0; font-size:25px; font-weight:800; letter-spacing:.2px; }
+  .login-hero p { margin:6px 0 0; color:var(--gold); }
+  #lpin { letter-spacing:.6em; font-size:26px; text-align:center; }
+  .secure { display:flex; gap:6px; align-items:center; justify-content:center; color:var(--muted); font-size:12.5px; margin-top:16px; }
+  .secure svg { width:14px; height:14px; color:var(--mint); }
+
+  /* Treasurer entry */
+  .mrow { background:linear-gradient(180deg,var(--card2),var(--card)); border:1px solid var(--line); border-radius:18px; padding:13px 14px; margin-bottom:10px; border-left:3px solid transparent; }
+  .mrow.saved { border-left-color:var(--mint); }
+  .mrow .head { display:flex; align-items:center; gap:10px; margin-bottom:6px; }
+  .mrow .head .av { width:34px; height:34px; font-size:13px; border-radius:11px; }
+  .mrow .head b { flex:1; }
+  .mrow .hint { font-size:13px; color:var(--gold); background:var(--gold-l); border-radius:10px; padding:6px 10px; margin-bottom:8px; }
+  .fields { display:grid; grid-template-columns:1fr 1fr; gap:4px 10px; }
+  .fields label { margin:4px 0 3px; font-size:12px; }
+  .fields input { font-size:16px; padding:10px; border-radius:12px; }
+  .sticky { position:sticky; bottom:92px; z-index:5; }
+  .loading { display:grid; place-items:center; padding:70px 0; }
+  .spin { width:34px; height:34px; border-radius:50%; border:3px solid rgba(243,201,105,.15); border-top-color:var(--gold); animation:sp 0.8s linear infinite; }
+  @keyframes sp { to { transform:rotate(360deg); } }
+  .fade { animation:fd .35s ease both; }
+  .fade:nth-child(2) { animation-delay:.05s; } .fade:nth-child(3) { animation-delay:.1s; } .fade:nth-child(4) { animation-delay:.15s; }
+  @keyframes fd { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+  .foot { text-align:center; color:var(--muted); font-size:12px; margin:18px 0; }
+  @media (prefers-reduced-motion: reduce) { .fade, .spin, .progress i { animation:none; transition:none; } }
 </style>
 </head>
 <body>
-<div id="splash"><img src="icon-192.png" alt=""><b>Friends Circle Bachat Gat</b><span>आपली बचत, आपला विश्वास</span><div class="bar"><i></i></div></div>
-<div id="off"><div><b>इंटरनेट नाही</b><p>इंटरनेट सुरू करा आणि पुन्हा उघडा.<br>No internet. Please connect and reopen.</p></div></div>
-<iframe id="app" title="Friends Circle Bachat Gat" allow="clipboard-write"></iframe>
+<div class="appbar">
+  <div class="logo">₹</div>
+  <div class="ttl"><b id="title">Friends Circle Bachat Gat</b><span id="subtitle"></span></div>
+  <select id="lang" class="pill" aria-label="Language">
+    <option value="mr">मराठी</option>
+    <option value="hi">हिंदी</option>
+    <option value="en">English</option>
+  </select>
+  <button id="logoutBtn" class="iconbtn hidden" aria-label="Log out"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg></button>
+</div>
+<main id="app"><div class="loading"><div class="spin"></div></div></main>
+<nav id="nav" class="nav hidden"></nav>
+
 <script>
-  // The group's Apps Script web app (the /exec link from Deploy). Only this line changes if the link changes.
-  var APP_URL = 'https://script.google.com/macros/s/AKfycbx_W6K4qAjk7oSgf1u3SnCdjNQeYrDkhNv6xnf8Cq2bQ5IoJYYhI2dmRzpwPEH3L1_r/exec';
-  var f = document.getElementById('app'), sp = document.getElementById('splash');
-  f.onload = function () { sp.style.opacity = 0; setTimeout(function () { sp.style.display = 'none'; }, 400); };
-  f.src = APP_URL;
-  function net() { document.getElementById('off').style.display = navigator.onLine ? 'none' : 'flex'; }
-  addEventListener('online', function () { net(); f.src = APP_URL; }); addEventListener('offline', net); net();
-  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function () {});
+var T = {
+  en: {
+    tabMe:'My account', tabMonth:'Monthly', tabRemind:'Reminders', total:'Total', totalDeposits:'Total deposits', interestEarned:'Interest + penalties earned', paidCount:'Members paid', date:'Date', notPaid:'Not paid', paidOn:'Paid on', datePaid:'Date paid', remindHelp:'Tap WhatsApp next to each member. The message with their amount is filled in; just press send.', stillDue:'Not paid yet', noPhone:'no phone number',
+    login:'Log in', memberNo:'Your member number (or ADMIN)', pin:'PIN', logout:'Log out',
+    bad_login:'Wrong member number or PIN.', locked:'Too many wrong tries. Try again after 15 minutes or ask the treasurer.',
+    session:'Please log in again.', network:'Could not connect. Check your internet and try again.',
+    hello:'Namaste', mySavings:'My total savings', deposited:'Deposited', interestShare:'My share of interest',
+    loan:'Loan I have to repay', interestDue:'Interest due each month', net:'Savings minus loan',
+    group:'Whole group', totalSavings:'Group savings', loansOut:'Loans given out', members:'Active members', cashLeft:'Cash not yet handed over',
+    history:'My monthly entries', month:'Month', paid:'Paid', loanTaken:'Loan taken', none:'No entries yet.',
+    changePin:'Change my PIN', oldPin:'Current PIN', newPin:'New PIN', save:'Save', pinChanged:'PIN changed.',
+    wrong_old_pin:'Current PIN is wrong.', bad_new_pin:'New PIN must be digits only (4 or more; 6 or more for ADMIN).', weak_pin:'That PIN is too easy to guess. Choose another.',
+    tabEntry:'Monthly entry', tabAll:'All members', tabPin:'PIN',
+    pickMonth:'Month', load:'Open month', fillExpected:'Fill ₹ deposit + interest for empty rows',
+    deposit:'Deposit', interest:'Interest', repaid:'Loan repaid', penalty:'Penalty', loanGiven:'Loan given', note:'Note',
+    loanBefore:'Loan at start of month', suggested:'interest due', saved:'saved', saveMonth:'Save this month',
+    savedMsg:'Saved. Updated {u} rows, added {a} new rows.', busy:'Someone else is saving. Try again in a moment.',
+    collected:'Collected this month', givenOut:'Loans given this month', left:'Left over',
+    cashTitle:'Cash handed over', handedTo:'Handed to', amount:'Amount', addCash:'Add', bad_input:'Please fill all fields.',
+    save_failed:'Could not save: ', unsaved:'You have unsaved changes. Leave anyway?', updatedAt:'Last month in the book',
+    net2:'Net', name:'Name', savings:'Savings', everyone:'All members: savings and loans', loanCol:'Loan'
+  },
+  mr: {
+    tabMe:'माझे खाते', tabMonth:'मासिक', tabRemind:'आठवण संदेश', total:'एकूण', totalDeposits:'एकूण वर्गणी', interestEarned:'मिळालेले व्याज + दंड', paidCount:'भरलेले सभासद', date:'तारीख', notPaid:'बाकी', paidOn:'भरले', datePaid:'भरल्याची तारीख', remindHelp:'प्रत्येक सभासदासमोरील WhatsApp दाबा. रकमेसह संदेश तयार असेल; फक्त पाठवा दाबा.', stillDue:'अजून न भरलेले', noPhone:'फोन नंबर नाही',
+    login:'लॉग इन', memberNo:'तुमचा सभासद क्रमांक (किंवा ADMIN)', pin:'पिन', logout:'बाहेर पडा',
+    bad_login:'सभासद क्रमांक किंवा पिन चुकीचा आहे.', locked:'खूप वेळा चुकीचा पिन. १५ मिनिटांनी पुन्हा प्रयत्न करा किंवा खजिनदाराला विचारा.',
+    session:'कृपया पुन्हा लॉग इन करा.', network:'जोडणी झाली नाही. इंटरनेट तपासा आणि पुन्हा प्रयत्न करा.',
+    hello:'नमस्कार', mySavings:'माझी एकूण बचत', deposited:'जमा केलेली रक्कम', interestShare:'व्याजातील माझा वाटा',
+    loan:'माझे फेडायचे कर्ज', interestDue:'दरमहा व्याज', net:'बचत वजा कर्ज',
+    group:'संपूर्ण गट', totalSavings:'गटाची बचत', loansOut:'दिलेले कर्ज', members:'सक्रिय सभासद', cashLeft:'हाती न दिलेली रोख',
+    history:'माझ्या मासिक नोंदी', month:'महिना', paid:'भरले', loanTaken:'घेतलेले कर्ज', none:'अजून नोंदी नाहीत.',
+    changePin:'माझा पिन बदला', oldPin:'सध्याचा पिन', newPin:'नवीन पिन', save:'जतन करा', pinChanged:'पिन बदलला.',
+    wrong_old_pin:'सध्याचा पिन चुकीचा आहे.', bad_new_pin:'नवीन पिन फक्त अंकांत (किमान ४; ADMIN साठी ६).', weak_pin:'हा पिन सोपा आहे. दुसरा निवडा.',
+    tabEntry:'मासिक नोंद', tabAll:'सर्व सभासद', tabPin:'पिन',
+    pickMonth:'महिना', load:'महिना उघडा', fillExpected:'रिकाम्या ओळीत वर्गणी + व्याज भरा',
+    deposit:'वर्गणी', interest:'व्याज', repaid:'कर्ज परतफेड', penalty:'दंड', loanGiven:'दिलेले कर्ज', note:'टीप',
+    loanBefore:'महिन्याच्या सुरुवातीचे कर्ज', suggested:'व्याज येणे', saved:'जतन', saveMonth:'हा महिना जतन करा',
+    savedMsg:'जतन झाले. {u} ओळी बदलल्या, {a} नवीन ओळी जोडल्या.', busy:'दुसरे कोणी जतन करत आहे. थोड्या वेळाने प्रयत्न करा.',
+    collected:'या महिन्याची जमा', givenOut:'या महिन्यात दिलेले कर्ज', left:'शिल्लक',
+    cashTitle:'हाती दिलेली रोख', handedTo:'कोणाकडे दिली', amount:'रक्कम', addCash:'जोडा', bad_input:'सर्व माहिती भरा.',
+    save_failed:'जतन झाले नाही: ', unsaved:'बदल जतन झाले नाहीत. तरीही जायचे?', updatedAt:'पुस्तकातील शेवटचा महिना',
+    net2:'निव्वळ', name:'नाव', savings:'बचत', everyone:'सर्व सभासद: बचत आणि कर्ज', loanCol:'कर्ज'
+  },
+  hi: {
+    tabMe:'मेरा खाता', tabMonth:'मासिक', tabRemind:'रिमाइंडर', total:'कुल', totalDeposits:'कुल जमा', interestEarned:'मिला ब्याज + जुर्माना', paidCount:'भुगतान किए सदस्य', date:'तारीख', notPaid:'बाकी', paidOn:'भरा', datePaid:'भुगतान की तारीख', remindHelp:'हर सदस्य के आगे WhatsApp दबाएँ। राशि के साथ संदेश तैयार होगा; बस भेजें दबाएँ।', stillDue:'अभी तक नहीं भरा', noPhone:'फोन नंबर नहीं',
+    login:'लॉग इन', memberNo:'आपका सदस्य नंबर (या ADMIN)', pin:'पिन', logout:'लॉग आउट',
+    bad_login:'सदस्य नंबर या पिन गलत है।', locked:'बहुत बार गलत पिन। 15 मिनट बाद फिर कोशिश करें या खजांची से पूछें।',
+    session:'कृपया फिर से लॉग इन करें।', network:'कनेक्ट नहीं हो पाया। इंटरनेट देखें और फिर कोशिश करें।',
+    hello:'नमस्ते', mySavings:'मेरी कुल बचत', deposited:'जमा राशि', interestShare:'ब्याज में मेरा हिस्सा',
+    loan:'मेरा बाकी कर्ज', interestDue:'हर महीने का ब्याज', net:'बचत घटा कर्ज',
+    group:'पूरा समूह', totalSavings:'समूह की बचत', loansOut:'दिया गया कर्ज', members:'सक्रिय सदस्य', cashLeft:'जो नकद सौंपा नहीं गया',
+    history:'मेरी मासिक एंट्री', month:'महीना', paid:'भरा', loanTaken:'लिया कर्ज', none:'अभी कोई एंट्री नहीं।',
+    changePin:'मेरा पिन बदलें', oldPin:'मौजूदा पिन', newPin:'नया पिन', save:'सेव करें', pinChanged:'पिन बदल गया।',
+    wrong_old_pin:'मौजूदा पिन गलत है।', bad_new_pin:'नया पिन सिर्फ अंक (कम से कम 4; ADMIN के लिए 6)।', weak_pin:'यह पिन आसान है। दूसरा चुनें।',
+    tabEntry:'मासिक एंट्री', tabAll:'सभी सदस्य', tabPin:'पिन',
+    pickMonth:'महीना', load:'महीना खोलें', fillExpected:'खाली पंक्तियों में जमा + ब्याज भरें',
+    deposit:'जमा', interest:'ब्याज', repaid:'कर्ज वापसी', penalty:'जुर्माना', loanGiven:'दिया कर्ज', note:'नोट',
+    loanBefore:'महीने की शुरुआत का कर्ज', suggested:'ब्याज देय', saved:'सेव', saveMonth:'यह महीना सेव करें',
+    savedMsg:'सेव हो गया। {u} पंक्तियाँ बदलीं, {a} नई जोड़ीं।', busy:'कोई और सेव कर रहा है। थोड़ी देर बाद कोशिश करें।',
+    collected:'इस महीने की वसूली', givenOut:'इस महीने दिया कर्ज', left:'बचा हुआ',
+    cashTitle:'सौंपी गई नकदी', handedTo:'किसे दी', amount:'राशि', addCash:'जोड़ें', bad_input:'सभी जानकारी भरें।',
+    save_failed:'सेव नहीं हुआ: ', unsaved:'बदलाव सेव नहीं हुए। फिर भी जाएँ?', updatedAt:'बही का आखिरी महीना',
+    net2:'शुद्ध', name:'नाम', savings:'बचत', everyone:'सभी सदस्य: बचत और कर्ज', loanCol:'कर्ज'
+  }
+};
+
+// Extra words for the new design
+(function () {
+  var X = {
+    en: { tagline:'Our savings, our trust', secure:'Protected by your PIN', noLoan:'No loan', loanActive:'Loan running', hasLoan:'has loan',
+          membersPaid:'paid this month', growth:'My savings growth', whoBorrowed:'Who has the loans', memberLbl:'Member', netLbl:'Net', youThis:'You', lastPaid:'Last paid', admin:'Treasurer', perMonth:'/ month' },
+    mr: { tagline:'आपली बचत, आपला विश्वास', secure:'तुमच्या पिनने सुरक्षित', noLoan:'कर्ज नाही', loanActive:'चालू कर्ज', hasLoan:'कर्ज',
+          membersPaid:'या महिन्यात भरले', growth:'माझ्या बचतीची वाढ', whoBorrowed:'कर्ज कोणाकडे', memberLbl:'सभासद', netLbl:'निव्वळ', youThis:'तुम्ही', lastPaid:'शेवटचा भरणा', admin:'खजिनदार', perMonth:'/ महिना' },
+    hi: { tagline:'हमारी बचत, हमारा भरोसा', secure:'आपके पिन से सुरक्षित', noLoan:'कोई कर्ज नहीं', loanActive:'चालू कर्ज', hasLoan:'कर्ज',
+          membersPaid:'इस महीने भरा', growth:'मेरी बचत की बढ़त', whoBorrowed:'कर्ज किसके पास', memberLbl:'सदस्य', netLbl:'शुद्ध', youThis:'आप', lastPaid:'आखिरी भुगतान', admin:'खजांची', perMonth:'/ महीना' }
+  };
+  Object.keys(X).forEach(function (l) { Object.keys(X[l]).forEach(function (k) { T[l][k] = X[l][k]; }); });
+})();
+
+var state = { lang:'mr', token:null, role:null, tab:null, dirty:false };
+function store(k, v) { try { if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) {} }
+function load(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+function t(k) { return (T[state.lang] && T[state.lang][k]) || T.en[k] || k; }
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function rs(n) {
+  n = Number(n) || 0;
+  var neg = n < 0; n = Math.abs(Math.round(n));
+  return (neg ? '-' : '') + '₹' + n.toLocaleString('en-IN');
+}
+function loc() { return state.lang === 'en' ? 'en-IN' : (state.lang === 'mr' ? 'mr-IN' : 'hi-IN'); }
+function monthName(key, short) {
+  if (!key || !/^\d{4}-\d{2}$/.test(key)) return esc(key);
+  var p = key.split('-');
+  var d = new Date(Number(p[0]), Number(p[1]) - 1, 1);
+  try { return d.toLocaleDateString(loc(), short ? { month:'short' } : { month:'long', year:'numeric' }); } catch (e) { return key; }
+}
+function dayName(d) {
+  if (!d) return '';
+  var p = d.split('-'), dt = new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
+  try { return dt.toLocaleDateString(loc(), { day:'numeric', month:'short' }); } catch (e) { return d; }
+}
+function thisMonth() { var d = new Date(); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2); }
+function today() { var d = new Date(); return thisMonth() + '-' + ('0' + d.getDate()).slice(-2); }
+function $(id) { return document.getElementById(id); }
+function short(id) { return String(id).replace(/^M0?/, ''); }
+
+var AV_COLORS = ['#1d9a75', '#2b7fd1', '#8b5cf6', '#e0732b', '#0ea5b7', '#d0457a', '#4f9a2f', '#b8862b', '#6366f1', '#c2410c'];
+function avatar(name, id) {
+  var parts = String(name || '?').trim().split(/\s+/);
+  var ini = (parts[0][0] || '') + (parts.length > 1 ? parts[parts.length - 1][0] : '');
+  var n = 0; String(id || name).split('').forEach(function (c) { n += c.charCodeAt(0); });
+  var c = AV_COLORS[n % AV_COLORS.length];
+  return '<div class="av" style="background:linear-gradient(135deg,' + c + ',' + c + 'aa)">' + esc(ini.toUpperCase()) + '</div>';
+}
+
+var IC = {
+  home:'<path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20h5v-6h4v6h5V9.5"/>',
+  users:'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.6-3.6 3.2-5.5 6.5-5.5s5.9 1.9 6.5 5.5"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8"/><path d="M18 14.8c2 .7 3.2 2.4 3.5 5.2"/>',
+  cal:'<rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/><path d="m9 15 2 2 4-4"/>',
+  edit:'<path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16v4z"/><path d="m13.5 6.5 4 4"/>',
+  bell:'<path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/>',
+  lock:'<rect x="4.5" y="10.5" width="15" height="10" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/><circle cx="12" cy="15.5" r="1.3"/>',
+  loan:'<path d="M3 7h18v12H3z"/><path d="M3 11h18"/><path d="M7 15h3"/>',
+  chart:'<path d="M3 20h18"/><path d="M5 16l4-5 4 3 6-8"/><path d="M15 6h4v4"/>',
+  ok:'<circle cx="12" cy="12" r="9"/><path d="m8 12.5 3 3 5-6"/>',
+  wa:'<path d="M20.5 11.6a8.5 8.5 0 0 1-12.6 7.4L3.5 20.5l1.5-4.3a8.5 8.5 0 1 1 15.5-4.6z"/><path d="M9 8.5c0 3.5 2.6 6.5 6.5 6.5l1-1.5-2-1-1 1c-1.2-.4-2.4-1.6-2.8-2.8l1-1-1-2-1.7.8"/>'
+};
+function icon(name) { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">' + IC[name] + '</svg>'; }
+
+// Address of the group's Apps Script web app (Deploy -> Web app URL). Used when the app runs on GitHub.
+var APP_URL = 'https://script.google.com/macros/s/AKfycbx_W6K4qAjk7oSgf1u3SnCdjNQeYrDkhNv6xnf8Cq2bQ5IoJYYhI2dmRzpwPEH3L1_r/exec';
+var ON_GOOGLE = !!(window.google && google.script && google.script.run);
+function call(fn) {
+  var args = Array.prototype.slice.call(arguments, 1);
+  function done(r) {
+    if (r && r.error === 'session') { logout(true); }
+    return r || { ok:false, error:'network' };
+  }
+  if (ON_GOOGLE) {
+    return new Promise(function (resolve) {
+      google.script.run
+        .withSuccessHandler(function (r) { resolve(done(r)); })
+        .withFailureHandler(function () { resolve({ ok:false, error:'network' }); })[fn].apply(null, args);
+    });
+  }
+  // Plain-text POST keeps this a "simple" request, so the browser allows Google's answer.
+  return fetch(APP_URL, { method:'POST', body: JSON.stringify({ fn: fn, args: args }), redirect:'follow' })
+    .then(function (res) { return res.json(); })
+    .then(done)
+    .catch(function () { return { ok:false, error:'network' }; });
+}
+function appLink(fallback) { return ON_GOOGLE ? fallback : (location.origin + location.pathname); }
+
+/* Count the big number up from 0 so the balance feels alive. */
+function countUp(el, to) {
+  if (!el) return;
+  if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) { el.textContent = rs(to); return; }
+  var t0 = null, dur = 700;
+  function step(ts) {
+    if (!t0) t0 = ts;
+    var p = Math.min(1, (ts - t0) / dur), e = 1 - Math.pow(1 - p, 3);
+    el.textContent = rs(to * e);
+    if (p < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+/* ---------- Login ---------- */
+function showLogin(msg) {
+  $('logoutBtn').classList.add('hidden');
+  $('nav').classList.add('hidden');
+  $('subtitle').textContent = '';
+  $('app').innerHTML =
+    '<div class="login-hero"><div class="logo">₹</div><h1>Friends Circle Bachat Gat</h1><p>' + t('tagline') + '</p></div>' +
+    '<div class="card fade"><form id="loginForm" autocomplete="off">' +
+    '<label for="lid" style="margin-top:2px">' + t('memberNo') + '</label>' +
+    '<input id="lid" inputmode="text" autocapitalize="characters" maxlength="5" required placeholder="5">' +
+    '<label for="lpin">' + t('pin') + '</label>' +
+    '<input id="lpin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="12" required placeholder="••••">' +
+    '<button class="btn" id="lbtn">' + t('login') + '</button>' +
+    '<div class="err" id="lerr">' + (msg ? esc(t(msg)) : '') + '</div></form>' +
+    '<div class="secure">' + icon('lock') + t('secure') + '</div></div>';
+  $('loginForm').onsubmit = function (e) {
+    e.preventDefault();
+    $('lbtn').disabled = true; $('lerr').textContent = '';
+    call('apiLogin', $('lid').value, $('lpin').value).then(function (r) {
+      $('lbtn').disabled = false;
+      if (!r.ok) { $('lerr').textContent = t(r.error); $('lpin').value = ''; return; }
+      state.token = r.token; state.role = r.role;
+      store('sg_token', r.token); store('sg_role', r.role);
+      start();
+    });
+  };
+}
+
+function logout(expired) {
+  if (state.token && !expired) call('apiLogout', state.token);
+  state.token = null; state.role = null; state.dirty = false; state.tab = null;
+  store('sg_token', null); store('sg_role', null); store('sg_tab', null);
+  showLogin(expired ? 'session' : '');
+}
+
+/* ---------- Pages and bottom menu ---------- */
+var TABS = {
+  member: [['me', 'tabMe', 'home'], ['all', 'tabAll', 'users'], ['month', 'tabMonth', 'cal'], ['pin', 'tabPin', 'lock']],
+  admin: [['entry', 'tabEntry', 'edit'], ['all', 'tabAll', 'users'], ['month', 'tabMonth', 'cal'], ['remind', 'tabRemind', 'bell'], ['pin', 'tabPin', 'lock']]
+};
+function start() {
+  $('logoutBtn').classList.remove('hidden');
+  var list = TABS[state.role] || TABS.member;
+  if (!state.tab || !list.some(function (x) { return x[0] === state.tab; })) state.tab = list[0][0];
+  $('subtitle').textContent = state.role === 'admin' ? t('admin') : t('tagline');
+  renderTabs();
+}
+function renderTabs() {
+  var list = TABS[state.role] || TABS.member;
+  var nav = $('nav');
+  nav.classList.remove('hidden');
+  nav.innerHTML = list.map(function (x) {
+    return '<button data-tab="' + x[0] + '" class="' + (state.tab === x[0] ? 'on' : '') + '"><div class="ic">' + icon(x[2]) + '</div><span>' + t(x[1]) + '</span></button>';
+  }).join('');
+  Array.prototype.forEach.call(nav.querySelectorAll('button'), function (b) {
+    b.onclick = function () {
+      if (state.dirty && !confirm(t('unsaved'))) return;
+      state.dirty = false; state.tab = b.getAttribute('data-tab'); store('sg_tab', state.tab); renderTabs();
+      window.scrollTo(0, 0);
+    };
+  });
+  $('app').innerHTML = '<div id="pane"></div>';
+  if (state.tab === 'me') renderMe();
+  else if (state.tab === 'all') renderAll();
+  else if (state.tab === 'month') renderMonth(state.viewMonth);
+  else if (state.tab === 'entry') renderEntry(state.month || thisMonth());
+  else if (state.tab === 'remind') renderRemind(thisMonth());
+  else { $('pane').innerHTML = pinCard(); wirePin(); }
+}
+function paneError(r) { if (r.error !== 'session') $('pane').innerHTML = '<div class="card err">' + esc(t(r.error)) + '</div>'; }
+function loading() { $('pane').innerHTML = '<div class="loading"><div class="spin"></div></div>'; }
+
+/* ---------- Small SVG charts ---------- */
+function areaChart(points) {
+  // points: [{label, value}] oldest first
+  var W = 320, H = 130, P = { l:8, r:8, t:14, b:24 };
+  if (!points.length) return '';
+  var max = Math.max.apply(null, points.map(function (p) { return p.value; })) || 1;
+  var n = points.length, step = n > 1 ? (W - P.l - P.r) / (n - 1) : 0;
+  var xy = points.map(function (p, i) {
+    return [P.l + (n > 1 ? i * step : (W - P.l - P.r) / 2), P.t + (H - P.t - P.b) * (1 - p.value / max)];
+  });
+  var line = xy.map(function (q, i) { return (i ? 'L' : 'M') + q[0].toFixed(1) + ' ' + q[1].toFixed(1); }).join(' ');
+  var area = line + ' L' + xy[n - 1][0].toFixed(1) + ' ' + (H - P.b) + ' L' + xy[0][0].toFixed(1) + ' ' + (H - P.b) + ' Z';
+  return '<svg class="chart" viewBox="0 0 ' + W + ' ' + H + '" role="img">' +
+    '<defs><linearGradient id="ag" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f3c969" stop-opacity=".45"/><stop offset="1" stop-color="#f3c969" stop-opacity="0"/></linearGradient></defs>' +
+    [0.25, 0.5, 0.75].map(function (f) { var y = P.t + (H - P.t - P.b) * f; return '<line x1="' + P.l + '" x2="' + (W - P.r) + '" y1="' + y + '" y2="' + y + '" stroke="rgba(255,255,255,.06)"/>'; }).join('') +
+    '<path d="' + area + '" fill="url(#ag)"/>' +
+    '<path d="' + line + '" fill="none" stroke="#f3c969" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>' +
+    xy.map(function (q, i) {
+      return '<circle cx="' + q[0] + '" cy="' + q[1] + '" r="' + (i === n - 1 ? 5 : 3.5) + '" fill="' + (i === n - 1 ? '#f3c969' : '#121822') + '" stroke="#f3c969" stroke-width="2"/>' +
+        '<text x="' + q[0] + '" y="' + (H - 6) + '" fill="#8b97a8" font-size="11" text-anchor="middle">' + esc(points[i].label) + '</text>';
+    }).join('') +
+    '</svg>';
+}
+var DONUT = ['#f3c969', '#3ee6a8', '#7aa7ff', '#ff8fa3', '#c792ea', '#ffb86b', '#5ad1e6', '#a3e635'];
+function donut(parts, centerTop, centerBottom) {
+  var total = parts.reduce(function (s, p) { return s + p.value; }, 0) || 1;
+  var R = 50, C = 2 * Math.PI * R, off = 0;
+  var arcs = parts.map(function (p, i) {
+    var len = C * p.value / total, gap = parts.length > 1 ? 2 : 0;
+    var s = '<circle cx="66" cy="66" r="' + R + '" fill="none" stroke="' + DONUT[i % DONUT.length] + '" stroke-width="16" stroke-dasharray="' + Math.max(len - gap, 0.1) + ' ' + C + '" stroke-dashoffset="' + (-off) + '" transform="rotate(-90 66 66)" stroke-linecap="butt"/>';
+    off += len; return s;
+  }).join('');
+  return '<svg viewBox="0 0 132 132"><circle cx="66" cy="66" r="' + R + '" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="16"/>' + arcs +
+    '<text x="66" y="62" text-anchor="middle" fill="#eef2f6" font-size="17" font-weight="700">' + esc(centerTop) + '</text>' +
+    '<text x="66" y="80" text-anchor="middle" fill="#8b97a8" font-size="10.5">' + esc(centerBottom) + '</text></svg>';
+}
+function ring(pct, label) {
+  var R = 40, C = 2 * Math.PI * R;
+  return '<svg viewBox="0 0 96 96"><defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3ee6a8"/><stop offset="1" stop-color="#14b37d"/></linearGradient></defs>' +
+    '<circle cx="48" cy="48" r="' + R + '" fill="none" stroke="rgba(255,255,255,.07)" stroke-width="9"/>' +
+    '<circle id="ringarc" cx="48" cy="48" r="' + R + '" fill="none" stroke="url(#rg)" stroke-width="9" stroke-linecap="round" stroke-dasharray="' + C + '" stroke-dashoffset="' + C + '" data-to="' + (C * (1 - pct / 100)) + '" transform="rotate(-90 48 48)" style="transition:stroke-dashoffset .9s ease"/>' +
+    '<text x="48" y="53" text-anchor="middle" fill="#eef2f6" font-size="19" font-weight="700">' + pct + '%</text></svg>';
+}
+
+/* Page: my account */
+function renderMe() {
+  loading();
+  call('apiMyData', state.token).then(function (r) {
+    if (!r.ok) return paneError(r);
+    var me = r.me, g = r.group;
+    var loanCard = me.loan > 0
+      ? '<div class="card loancard fade"><div class="ico" style="background:var(--red-l);color:var(--red)">' + icon('loan') + '</div>' +
+        '<div style="flex:1"><div class="label">' + t('loan') + '</div><div class="big2 neg">' + rs(me.loan) + '</div></div>' +
+        '<div style="text-align:right"><div class="label">' + t('interest') + '</div><b style="font-size:19px">' + rs(me.interestDue) + '</b><div class="label">' + t('perMonth') + '</div></div></div>'
+      : '<div class="card loancard fade"><div class="ico" style="background:var(--em-l);color:var(--mint)">' + icon('ok') + '</div>' +
+        '<div><b style="font-size:18px">' + t('noLoan') + '</b><div class="label">' + t('net') + ': ' + rs(me.net) + '</div></div></div>';
+    var asc = r.history.slice().sort(function (a, b) { return a.month < b.month ? -1 : 1; });
+    var cum = 0, pts = asc.map(function (h) { cum += h.deposit; return { label: monthName(h.month, true), value: cum }; });
+    var growth = pts.length ? '<div class="card fade"><h2>' + icon('chart').replace('<svg ', '<svg style="width:18px;height:18px;color:var(--gold)" ') + t('growth') + '</h2>' + areaChart(pts.slice(-8)) +
+      '<div class="stats" style="margin-top:12px"><div class="stat"><span>' + t('deposited') + '</span><b>' + rs(me.deposited) + '</b></div>' +
+      '<div class="stat"><span>' + t('interestShare') + '</span><b class="pos">+' + rs(me.interestShare) + '</b></div></div></div>' : '';
+    var hist = r.history.length ? '<ul class="list">' + r.history.map(function (h) {
+      var p = h.month.split('-');
+      var bits = [];
+      if (h.interest) bits.push(t('interest') + ' ' + rs(h.interest));
+      if (h.penalty) bits.push(t('penalty') + ' ' + rs(h.penalty));
+      if (h.repaid) bits.push(t('repaid') + ' ' + rs(h.repaid));
+      if (h.loanTaken) bits.push(t('loanTaken') + ' ' + rs(h.loanTaken));
+      var total = h.deposit + h.interest + h.penalty + h.repaid;
+      return '<li class="li"><div class="mbadge">' + monthName(h.month, true) + '<small>' + p[0] + '</small></div>' +
+        '<div class="mid"><b>' + t('deposit') + ' ' + rs(h.deposit) + '</b><small>' + (bits.length ? esc(bits.join(' · ')) : '&nbsp;') + '</small></div>' +
+        '<div class="end"><b>' + rs(total) + '</b>' + (h.paidDate ? '<span class="badge green">✓ ' + dayName(h.paidDate) + '</span>' : '') + '</div></li>';
+    }).join('') + '</ul>' : '<p class="label">' + t('none') + '</p>';
+    var num = ('0000' + short(me.id)).slice(-4);
+    $('pane').innerHTML =
+      '<div class="hero fade"><div class="top"><span class="brand">Friends Circle</span><div class="chip"></div></div>' +
+      '<div class="cap">' + t('mySavings') + '</div><div class="amt" id="bigamt">₹0</div>' +
+      '<div class="cardno">••••  ••••  ••••  ' + num + '</div>' +
+      '<div class="holder"><div>' + t('memberLbl') + '<b>' + esc(me.name) + '</b></div><div style="text-align:right">' + t('netLbl') + '<b>' + rs(me.net) + '</b></div></div></div>' +
+      loanCard + growth +
+      '<div class="card fade"><h2>' + t('history') + '</h2>' + hist + '</div>' +
+      '<div class="foot">' + t('updatedAt') + ': ' + monthName(g.lastMonth) + '</div>';
+    countUp($('bigamt'), me.savings);
+  });
+}
+
+/* Page: all members */
+function renderAll() {
+  loading();
+  call('apiMyData', state.token).then(function (r) {
+    if (!r.ok) return paneError(r);
+    var g = r.group, myId = r.me ? r.me.id : '';
+    var tot = { s:0, l:0 }, borrowers = r.members.filter(function (m) { return m.loan > 0; }).sort(function (a, b) { return b.loan - a.loan; });
+    r.members.forEach(function (m) { tot.s += m.savings; tot.l += m.loan; });
+    var parts = borrowers.map(function (m) { return { name: m.name, value: m.loan }; });
+    var donutCard = parts.length ? '<div class="card fade"><h2>' + t('whoBorrowed') + '</h2><div class="donutwrap">' +
+      donut(parts, rs(g.loansOutstanding), borrowers.length + ' ' + t('hasLoan')) +
+      '<ul class="legend">' + parts.map(function (p, i) { return '<li><i style="background:' + DONUT[i % DONUT.length] + '"></i><span>' + esc(p.name) + '</span><b>' + rs(p.value) + '</b></li>'; }).join('') + '</ul></div></div>' : '';
+    $('pane').innerHTML =
+      '<div class="hero dark fade"><div class="top"><span class="brand" style="color:var(--gold);opacity:1">' + t('group') + '</span><span class="badge green">' + g.activeMembers + ' ' + t('members') + '</span></div>' +
+      '<div class="cap">' + t('totalSavings') + '</div><div class="amt" id="bigamt">₹0</div>' +
+      '<div class="row2"><div class="mini"><span>' + t('totalDeposits') + '</span><b>' + rs(g.totalDeposits) + '</b></div>' +
+      '<div class="mini"><span>' + t('interestEarned') + '</span><b class="pos">+' + rs(g.interestEarned) + '</b></div></div></div>' +
+      donutCard +
+      '<div class="stats fade" style="margin-bottom:14px"><div class="stat"><span>' + t('loansOut') + '</span><b>' + rs(g.loansOutstanding) + '</b></div>' +
+      '<div class="stat"><span>' + t('cashLeft') + '</span><b>' + rs(g.cashNotHandedOver) + '</b></div></div>' +
+      '<div class="card fade"><h2>' + t('everyone') + '</h2><ul class="list">' + r.members.map(function (m) {
+        return '<li class="li' + (m.id === myId ? ' me' : '') + '">' + avatar(m.name, m.id) +
+          '<div class="mid"><b>' + esc(m.name) + (m.id === myId ? ' <span class="badge gold">' + t('youThis') + '</span>' : '') + '</b>' +
+          '<small>#' + esc(short(m.id)) + ' · ' + t('savings') + ' ' + rs(m.savings) + (m.status !== 'active' ? ' · ' + esc(m.status) : '') + '</small></div>' +
+          '<div class="end">' + (m.loan > 0 ? '<b class="neg">' + rs(m.loan) + '</b><small class="label">' + t('interest') + ' ' + rs(m.interestDue) + '</small>' : '<span class="badge grey">' + t('noLoan') + '</span>') + '</div></li>';
+      }).join('') + '</ul>' +
+      '<div class="totalrow"><span>' + t('total') + '</span><span>' + rs(tot.s) + ' · <span class="neg">' + rs(tot.l) + '</span></span></div></div>' +
+      '<div class="foot">' + t('updatedAt') + ': ' + monthName(g.lastMonth) + '</div>';
+    countUp($('bigamt'), g.totalSavings);
+  });
+}
+
+/* Page: one month, who paid and when */
+function renderMonth(month) {
+  loading();
+  call('apiMonthView', state.token, month || thisMonth()).then(function (r) {
+    if (!r.ok) return paneError(r);
+    if (!month && !r.rows.some(function (x) { return x.hasRow; }) && r.months.length) { state.viewMonth = r.months[0]; return renderMonth(r.months[0]); }
+    state.viewMonth = r.month;
+    var opts = r.months.slice(); if (opts.indexOf(r.month) < 0) opts.push(r.month);
+    if (opts.indexOf(thisMonth()) < 0) opts.push(thisMonth());
+    opts.sort().reverse();
+    var paidN = 0, coll = 0, given = 0;
+    r.rows.forEach(function (x) { if (x.deposit > 0) paidN++; coll += x.deposit + x.interest + x.repaid + x.penalty; given += x.loanTaken; });
+    var pct = r.rows.length ? Math.round(paidN * 100 / r.rows.length) : 0;
+    var rows = r.rows.slice().sort(function (a, b) { return (a.deposit > 0) - (b.deposit > 0) || (a.id < b.id ? -1 : 1); });
+    $('pane').innerHTML =
+      '<div class="card fade"><select class="f" id="vm" style="font-weight:700">' + opts.map(function (m) { return '<option value="' + m + '"' + (m === r.month ? ' selected' : '') + '>' + monthName(m) + '</option>'; }).join('') + '</select>' +
+      '<div class="ringwrap">' + ring(pct) + '<div style="flex:1"><b style="font-size:26px">' + paidN + ' / ' + r.rows.length + '</b><div class="label">' + t('membersPaid') + '</div>' +
+      '<div class="stats" style="margin-top:10px;grid-template-columns:1fr"><div class="stat" style="padding:8px 12px"><span>' + t('collected') + '</span><b class="pos">' + rs(coll) + '</b></div></div></div></div>' +
+      '<div class="stats" style="margin-top:12px"><div class="stat"><span>' + t('givenOut') + '</span><b>' + rs(given) + '</b></div><div class="stat"><span>' + t('left') + '</span><b>' + rs(coll - given - r.cash) + '</b></div>' +
+      '</div></div>' +
+      '<div class="card fade"><ul class="list">' + rows.map(function (x) {
+        var total = x.deposit + x.interest + x.repaid + x.penalty;
+        var bits = [];
+        if (x.interest) bits.push(t('interest') + ' ' + rs(x.interest));
+        if (x.penalty) bits.push(t('penalty') + ' ' + rs(x.penalty));
+        if (x.repaid) bits.push(t('repaid') + ' ' + rs(x.repaid));
+        if (x.loanTaken) bits.push(t('loanTaken') + ' ' + rs(x.loanTaken));
+        var paid = x.deposit > 0;
+        return '<li class="li">' + avatar(x.name, x.id) +
+          '<div class="mid"><b>' + esc(x.name) + '</b><small>' + (bits.length ? esc(bits.join(' · ')) : '#' + esc(short(x.id))) + '</small></div>' +
+          '<div class="end">' + (paid ? '<b>' + rs(total) + '</b><span class="badge green">✓ ' + (x.paidDate ? dayName(x.paidDate) : t('paid')) + '</span>'
+                                       : '<span class="badge red">' + t('notPaid') + '</span>') + '</div></li>';
+      }).join('') + '</ul></div>';
+    $('vm').onchange = function () { renderMonth($('vm').value); };
+    setTimeout(function () { var a = $('ringarc'); if (a) a.style.strokeDashoffset = a.getAttribute('data-to'); }, 40);
+  });
+}
+
+/* Treasurer: WhatsApp reminders */
+function waText(x, month, url, group) {
+  var total = x.depositDue + x.interestDue;
+  var L = {
+    mr: 'नमस्कार ' + x.name + ',\n' + group + '\n' + monthName(month) + ' महिन्याची वर्गणी ₹' + x.depositDue + (x.interestDue ? ' + व्याज ₹' + x.interestDue : '') + ' = एकूण ₹' + total + ' कृपया भरा.\nतुमची बचत: ' + rs(x.savings) + (x.loan ? '\nतुमचे कर्ज: ' + rs(x.loan) : '') + (url ? '\nॲप: ' + url : ''),
+    hi: 'नमस्ते ' + x.name + ',\n' + group + '\n' + monthName(month) + ' की जमा ₹' + x.depositDue + (x.interestDue ? ' + ब्याज ₹' + x.interestDue : '') + ' = कुल ₹' + total + ' कृपया जमा करें।\nआपकी बचत: ' + rs(x.savings) + (x.loan ? '\nआपका कर्ज: ' + rs(x.loan) : '') + (url ? '\nऐप: ' + url : ''),
+    en: 'Namaste ' + x.name + ',\n' + group + '\n' + monthName(month) + ' deposit ₹' + x.depositDue + (x.interestDue ? ' + interest ₹' + x.interestDue : '') + ' = total ₹' + total + '. Please pay.\nYour savings: ' + rs(x.savings) + (x.loan ? '\nYour loan: ' + rs(x.loan) : '') + (url ? '\nApp: ' + url : '')
+  };
+  return L[state.lang] || L.mr;
+}
+function waLink(phone, text) {
+  var digits = String(phone || '').replace(/\D/g, '');
+  if (digits.length === 10) digits = '91' + digits;
+  return 'https://wa.me/' + (digits.length >= 11 ? digits : '') + '?text=' + encodeURIComponent(text);
+}
+function renderRemind(month) {
+  loading();
+  call('apiReminders', state.token, month).then(function (r) {
+    if (!r.ok) return paneError(r);
+    var due = r.rows.filter(function (x) { return !x.paid; }).length;
+    var rows = r.rows.slice().sort(function (a, b) { return (a.paid - b.paid) || (a.id < b.id ? -1 : 1); });
+    $('pane').innerHTML =
+      '<div class="hero dark fade"><div class="cap" style="margin-top:0;color:var(--gold);opacity:1">' + monthName(r.month) + '</div>' +
+      '<div class="amt">' + due + ' <span style="font-size:18px;font-weight:600">' + t('stillDue') + '</span></div>' +
+      '<div style="font-size:14px;opacity:.9;position:relative;z-index:1">' + t('remindHelp') + '</div></div>' +
+      '<div class="card fade"><ul class="list">' + rows.map(function (x) {
+        var i = r.rows.indexOf(x);
+        return '<li class="li">' + avatar(x.name, x.id) +
+          '<div class="mid"><b>' + esc(x.name) + '</b><small>' + rs(x.depositDue + x.interestDue) + (x.paid ? ' · <span class="pos">✓ ' + t('paid') + '</span>' : '') + (x.phone ? '' : ' · ' + t('noPhone')) + '</small></div>' +
+          '<div class="end"><a class="wa" target="_blank" rel="noopener" data-wa="' + i + '" href="' + esc(waLink(x.phone, waText(x, r.month, appLink(r.url), r.groupName))) + '">' + icon('wa') + 'WhatsApp</a></div></li>';
+      }).join('') + '</ul></div>';
+    Array.prototype.forEach.call(document.querySelectorAll('[data-wa]'), function (a) {
+      a.addEventListener('click', function () { a.classList.add('sent'); a.innerHTML = '✓ WhatsApp'; });
+    });
+  });
+}
+
+function pinCard() {
+  return '<div class="card fade"><h2>' + icon('lock').replace('<svg ', '<svg style="width:20px;height:20px;color:var(--em)" ') + t('changePin') + '</h2>' +
+    '<label>' + t('oldPin') + '</label><input id="op" type="password" inputmode="numeric" maxlength="12">' +
+    '<label>' + t('newPin') + '</label><input id="np" type="password" inputmode="numeric" maxlength="12">' +
+    '<button class="btn" id="pbtn">' + t('save') + '</button><div class="err" id="perr"></div></div>' +
+    '<div class="secure">' + icon('lock') + t('secure') + '</div>';
+}
+function wirePin() {
+  $('pbtn').onclick = function () {
+    $('pbtn').disabled = true;
+    call('apiChangePin', state.token, $('op').value, $('np').value).then(function (r) {
+      $('pbtn').disabled = false;
+      $('perr').className = r.ok ? 'ok' : 'err';
+      $('perr').textContent = r.ok ? t('pinChanged') : t(r.error);
+      if (r.ok) { $('op').value = ''; $('np').value = ''; }
+    });
+  };
+}
+
+/* Treasurer: monthly entry */
+var FIELDS = [['deposit', 'deposit'], ['interest', 'interest'], ['repaid', 'repaid'], ['penalty', 'penalty'], ['loanTaken', 'loanGiven']];
+
+function renderEntry(month) {
+  state.month = month;
+  $('pane').innerHTML =
+    '<div class="card fade" style="display:flex;gap:8px;align-items:center"><input id="mpick" type="month" value="' + esc(month) + '" style="flex:1;font-weight:700">' +
+    '<button class="btn ghost" id="mload" style="width:auto">' + t('load') + '</button></div><div id="mbody"><div class="loading"><div class="spin"></div></div></div>';
+  $('mload').onclick = function () {
+    if (state.dirty && !confirm(t('unsaved'))) return;
+    state.dirty = false; renderEntry($('mpick').value || thisMonth());
+  };
+  call('apiGetMonth', state.token, month).then(function (r) {
+    if (!r.ok) { $('mbody').innerHTML = '<div class="card err">' + esc(t(r.error)) + '</div>'; return; }
+    state.monthData = r;
+    var html = '<div class="card fade" id="mtotals"></div>' +
+      '<button class="btn gold" id="fill" style="margin:0 0 14px">' + t('fillExpected') + '</button>';
+    html += r.rows.map(function (row, i) {
+      var hint = row.loanBefore > 0 ? t('loanBefore') + ' ' + rs(row.loanBefore) + ' · ' + t('suggested') + ' ' + rs(row.suggestedInterest) : '';
+      return '<div class="mrow fade' + (row.saved ? ' saved' : '') + '"><div class="head">' + avatar(row.name, row.id) + '<b>' + esc(row.name) + '</b>' +
+        (row.saved ? '<span class="badge green">✓ ' + t('saved') + '</span>' : '<span class="badge grey">#' + esc(short(row.id)) + '</span>') + '</div>' +
+        (hint ? '<div class="hint">' + hint + '</div>' : '') +
+        '<div class="fields">' + FIELDS.map(function (f) {
+          var v = row[f[0]] || '';
+          return '<div><label>' + t(f[1]) + '</label><input type="number" inputmode="decimal" min="0" step="1" data-i="' + i + '" data-k="' + f[0] + '" value="' + esc(v) + '"></div>';
+        }).join('') +
+        '<div><label>' + t('datePaid') + '</label><input type="date" data-i="' + i + '" data-k="paidDate" value="' + esc(row.paidDate) + '"></div>' +
+        '<div style="grid-column:1/-1"><label>' + t('note') + '</label><input type="text" maxlength="300" data-i="' + i + '" data-k="note" value="' + esc(row.note) + '"></div>' +
+        '</div></div>';
+    }).join('');
+    html += '<div class="sticky"><button class="btn" id="msave">' + t('saveMonth') + '</button></div><div class="err" id="merr"></div>';
+    html += '<div class="card" style="margin-top:16px"><h2>' + t('cashTitle') + '</h2>' +
+      (r.cash.length ? '<ul class="list">' + r.cash.map(function (c) { return '<li class="li"><div class="mid"><b>' + esc(c.to) + '</b><small>' + esc(c.note) + '</small></div><div class="end"><b>' + rs(c.amount) + '</b></div></li>'; }).join('') + '</ul>' : '') +
+      '<label>' + t('handedTo') + '</label><input id="cto" maxlength="100">' +
+      '<label>' + t('amount') + '</label><input id="camt" type="number" inputmode="decimal" min="1">' +
+      '<label>' + t('note') + '</label><input id="cnote" maxlength="300">' +
+      '<button class="btn ghost" id="cadd" style="margin-top:14px">' + t('addCash') + '</button><div class="err" id="cerr"></div></div>';
+    $('mbody').innerHTML = html;
+
+    Array.prototype.forEach.call(document.querySelectorAll('#mbody .mrow input'), function (inp) {
+      inp.oninput = function () {
+        state.dirty = true;
+        var k = inp.getAttribute('data-k');
+        if (k !== 'paidDate' && k !== 'note' && inp.value) {
+          var dt = document.querySelector('input[data-i="' + inp.getAttribute('data-i') + '"][data-k="paidDate"]');
+          if (!dt.value) dt.value = today();
+        }
+        updateTotals();
+      };
+    });
+    $('fill').onclick = function () {
+      r.rows.forEach(function (row, i) {
+        var dep = document.querySelector('input[data-i="' + i + '"][data-k="deposit"]');
+        var int = document.querySelector('input[data-i="' + i + '"][data-k="interest"]');
+        if (!dep.value) { dep.value = row.suggestedDeposit; state.dirty = true; }
+        if (!int.value && row.suggestedInterest) { int.value = row.suggestedInterest; state.dirty = true; }
+        var dt = document.querySelector('input[data-i="' + i + '"][data-k="paidDate"]');
+        if (!dt.value) dt.value = today();
+      });
+      updateTotals();
+    };
+    $('msave').onclick = saveMonth;
+    if (state.flash) { $('merr').className = 'ok'; $('merr').textContent = state.flash; state.flash = null; }
+    $('cadd').onclick = function () {
+      $('cadd').disabled = true;
+      call('apiAddCash', state.token, month, $('cto').value.trim(), $('camt').value, $('cnote').value).then(function (x) {
+        $('cadd').disabled = false;
+        if (!x.ok) { $('cerr').textContent = t(x.error); return; }
+        renderEntry(month);
+      });
+    };
+    updateTotals();
+  });
+}
+
+function readRows() {
+  return state.monthData.rows.map(function (row, i) {
+    var out = { id: row.id };
+    FIELDS.concat([['note'], ['paidDate']]).forEach(function (f) {
+      var el = document.querySelector('input[data-i="' + i + '"][data-k="' + f[0] + '"]');
+      out[f[0]] = (f[0] === 'note' || f[0] === 'paidDate') ? el.value.trim() : (Number(el.value) || 0);
+    });
+    out._changed = row.saved || FIELDS.some(function (f) { return out[f[0]]; }) || out.note;
+    return out;
+  });
+}
+
+function updateTotals() {
+  var rows = readRows(), coll = 0, given = 0;
+  rows.forEach(function (r) { coll += r.deposit + r.interest + r.repaid + r.penalty; given += r.loanTaken; });
+  var cash = state.monthData.cash.reduce(function (s, c) { return s + c.amount; }, 0);
+  $('mtotals').innerHTML = '<div class="stats">' +
+    '<div class="stat"><span>' + t('collected') + '</span><b class="pos">' + rs(coll) + '</b></div>' +
+    '<div class="stat"><span>' + t('givenOut') + '</span><b>' + rs(given) + '</b></div>' +
+    '<div class="stat"><span>' + t('cashTitle') + '</span><b>' + rs(cash) + '</b></div>' +
+    '<div class="stat"><span>' + t('left') + '</span><b class="' + (coll - given - cash < 0 ? 'neg' : '') + '">' + rs(coll - given - cash) + '</b></div></div>';
+}
+
+function saveMonth() {
+  var rows = readRows().filter(function (r) { return r._changed; }).map(function (r) { delete r._changed; return r; });
+  $('msave').disabled = true; $('merr').className = 'err'; $('merr').textContent = '';
+  call('apiSaveMonth', state.token, state.month, rows).then(function (r) {
+    $('msave').disabled = false;
+    if (!r.ok) { $('merr').textContent = r.error === 'save_failed' ? t('save_failed') + (r.detail || '') : t(r.error); return; }
+    state.dirty = false;
+    state.flash = t('savedMsg').replace('{u}', r.updated).replace('{a}', r.added);
+    renderEntry(state.month);
+  });
+}
+
+/* ---------- Boot ---------- */
+(function () {
+  state.lang = load('sg_lang') || 'mr';
+  $('lang').value = state.lang;
+  $('lang').onchange = function () {
+    state.lang = $('lang').value; store('sg_lang', state.lang);
+    if (state.token) start(); else showLogin();
+  };
+  $('logoutBtn').onclick = function () { logout(false); };
+  window.addEventListener('beforeunload', function (e) { if (state.dirty) { e.preventDefault(); e.returnValue = ''; } });
+  state.token = load('sg_token'); state.role = load('sg_role'); state.tab = load('sg_tab');
+  if (state.token && state.role) start(); else showLogin();
+})();
 </script>
+<script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function () {});</script>
 </body>
 </html>
